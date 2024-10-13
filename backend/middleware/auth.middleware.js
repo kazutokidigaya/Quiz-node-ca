@@ -1,5 +1,26 @@
 import jwt from "jsonwebtoken";
 
+export const authenticateUser = async (req, res, next) => {
+  console.log("hell1");
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+  console.log("hell2");
+  if (!token) {
+    return res
+      .status(401)
+      .json({ success: false, message: "No token, authorization denied" });
+  }
+  console.log("hell3");
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY); // Assuming you are using JWT
+    console.log(decoded);
+    req.user = { id: decoded.id }; // Ensure the user object contains 'id' and not '_id'
+    next();
+    console.log("hell4");
+  } catch (error) {
+    return res.status(401).json({ success: false, message: "Invalid token" });
+  }
+};
+
 export const refreshAccessTokenIfNeeded = (req, res, next) => {
   const token = req.cookies.accessToken;
   if (!token) return next();
